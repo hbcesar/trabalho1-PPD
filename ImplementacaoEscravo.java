@@ -3,35 +3,34 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.UUID;
+import java.util.List;
 
-@SuppressWarnings("unused")
 public class ImplementacaoEscravo implements InterfaceEscravo {
 
-	public String id;
+	public int id;
 
 	@Override
-        public String getId() throws RemoteException {
+        public int getId() throws RemoteException {
 		return id;
 	}
 
         @Override
-	public void setId(String id) throws RemoteException {
+	public void setId(int id) throws RemoteException {
 		this.id = id;
 	}
 
 	/* Metodo que ordena o pedaco do vetor do cliente recebido pelo escravo. */
         @Override
-	public byte somar(byte[] vetor) throws RemoteException {
+	public Byte somar(List<Byte> vetor) throws RemoteException {
 		byte sum = 0;
 
-		for(byte number : vetor)
-			sum += number; 
+		for(Byte number : vetor)
+			sum = (byte) (sum ^ number); 
 		
 		return sum;
 	}
 
-	/* Desregistra o escravo da lista do Mestre em caso termino. */
+	// Desregistra o escravo da lista do Mestre em caso termino.
 	public void attachShutDownHook(final ImplementacaoMestre mestre) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -57,22 +56,24 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 		}
 
 		try {
-			/* Procura Mestre no Registry. */
-			Registry registry = LocateRegistry.getRegistry(host);
-			mestre = (ImplementacaoMestre) registry.lookup("ReferenciaMestre");
+                    /* Procura Mestre no Registry. */
+                    Registry registry = LocateRegistry.getRegistry(host);
+                    mestre = (ImplementacaoMestre) registry.lookup("ReferenciaMestre");
 
-			ImplementacaoEscravo escravo = new ImplementacaoEscravo();
+                    ImplementacaoEscravo escravo = new ImplementacaoEscravo();
+                    
+                    
 
-			//http://www.javapractices.com/topic/TopicAction.do?Id=56
-			escravo.setId(UUID.randomUUID().toString());
+                    //http://www.javapractices.com/topic/TopicAction.do?Id=56
+//                    escravo.setId(UUID.randomUUID().toString());
 
-			ImplementacaoEscravo stub = (ImplementacaoEscravo) UnicastRemoteObject.exportObject(escravo, 2001);
+                    ImplementacaoEscravo stub = (ImplementacaoEscravo) UnicastRemoteObject.exportObject(escravo, 2001);
 
-			//EscravoService stub = (EscravoService) UnicastRemoteObject.exportObject(escravo, 0);
+                    //EscravoService stub = (EscravoService) UnicastRemoteObject.exportObject(escravo, 0);
 
-			//De acordo com especificação, escravo deve se registrar no menino mestre
-			mestre.incluirFilaEscravos(stub, escravo.getId());
-			escravo.attachShutDownHook(mestre);
+                    //De acordo com especificação, escravo deve se registrar no menino mestre
+                    mestre.incluirFilaEscravos(stub);
+                    escravo.attachShutDownHook(mestre);
 
 		} catch (RemoteException | NotBoundException e) {
 			e.printStackTrace();

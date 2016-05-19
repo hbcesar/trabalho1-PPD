@@ -7,8 +7,9 @@ public interface InterfaceMestre extends java.rmi.Remote  {
 	public void incluirFilaEscravos(InterfaceEscravo escravo) throws RemoteException;
 
 	//Funcao usada pelo escravo para se desregistrar do mestre quando esse cai por algum motivo
-	public void removerFilaEscravos(String id) throws RemoteException;
+	public void removerFilaEscravos(InterfaceEscravo escravo) throws RemoteException;
+        public void removerFilaEscravos(int id) throws RemoteException;
 
 	//Funcao usada pelo cliente para solicitar soma do vetor ao mestre
-	public byte somar(byte[] vetor) throws RemoteException, Exception;
+	public byte somar(List<Byte> vetor) throws RemoteException, Exception;
 }

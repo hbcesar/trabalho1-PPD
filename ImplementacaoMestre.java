@@ -10,13 +10,15 @@ import java.util.Map;
 
 public class ImplementacaoMestre implements InterfaceMestre {
         //Lista de escravos guardada pelo mestre
-	private Map<String, InterfaceEscravo> listaEscravos = new HashMap<>();
+	private Map<Integer, InterfaceEscravo> listaEscravos = new HashMap<>();
         
         //Lista de threads (de escravos executando)s
 	private List<Thread> threads = new ArrayList<>();
         
         //Lista de "sub-somas" dos escravos
-        private byte[] subVetor;
+        private List<Byte> subVetor = new ArrayList<>();
+        
+        private int idEscravo = 0;
 
 	// Captura o CTRL+C
 	//http://stackoverflow.com/questions/1611931/catching-ctrlc-in-java
@@ -25,8 +27,8 @@ public class ImplementacaoMestre implements InterfaceMestre {
 			@Override
 			public void run() {
 
-				/* Remove todos escravos da lista em caso o mestre caia */
-				for (Map.Entry<String, InterfaceEscravo> escravo : listaEscravos
+				// Remove todos escravos da lista caso o mestre caia
+				for (Map.Entry<Integer, InterfaceEscravo> escravo : listaEscravos
 						.entrySet()) {
 					listaEscravos.remove(escravo);
 				}
@@ -37,12 +39,11 @@ public class ImplementacaoMestre implements InterfaceMestre {
 
 
 	//Metodo usado pelo cliente para fazer a soma
-	@SuppressWarnings("unused")
 	@Override
-	public byte somar(byte[] vetor) throws RemoteException {
+	public byte somar(List<Byte> vetor) throws RemoteException {
 		int i = 0;
-		byte[] resultados;
-		int tamVetor = vetor.length;
+		List<Byte> resultados = new ArrayList<>();
+		int tamVetor = vetor.size();
 		int tamVetorEscravos = tamVetor / this.threads.size();
 		int resto = 0;
 		int range = 0;
@@ -50,7 +51,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
 		int fim = tamVetorEscravos;
 
 		//Lista com objetos que gerenciam as threads de cada escravo, usada para obter os valores das somas dos vetores parciais
-		List<ThreadAC> meninxs = new ArrayList<>();
+		List<ThreadMestre> meninxs = new ArrayList<>();
 		
 		//Define o tamanho do subvetor que será enviado a cada escravo
 		if(tamVetorEscravos * listaEscravos.size() != tamVetor){
@@ -58,23 +59,24 @@ public class ImplementacaoMestre implements InterfaceMestre {
 		}
 		
                 //http://stackoverflow.com/questions/46898/how-to-efficiently-iterate-over-each-entry-in-a-map
-		for(Map.Entry<String, InterfaceEscravo> e: listaEscravos.entrySet()){
+		for(Map.Entry<Integer, InterfaceEscravo> e: listaEscravos.entrySet()){
 			//se a divisao de vetores nao for exata, vai atribuindo +1 campo do vetor a cada menino escravo
 			if(resto > 0){
-				fim++;
-				resto--;
+                            fim++;
+                            resto--;
 			}
 
 			//Cria copia do vetor com tamanho desejado
 			//http://www.tutorialspoint.com/java/util/arrays_copyofrange_short.htm
-			byte[] subVetor = Arrays.copyOfRange(vetor, inicio, fim);
+			List<Byte> subVetor = new ArrayList<>(); 
+                        subVetor = vetor.subList(inicio, fim);
 			range += tamVetorEscravos;
 			
 			inicio = ++fim;
 			fim += tamVetorEscravos;
 			
                         //Cria as threads para executar os meninos escravos
-			ThreadAC exec = new ThreadAC(e.getValue(), subVetor);
+			ThreadMestre exec = new ThreadMestre(e.getValue(), subVetor);
 			meninxs.add(exec);
 			Thread t = new Thread(exec);
 			threads.add(t);
@@ -92,37 +94,50 @@ public class ImplementacaoMestre implements InterfaceMestre {
 		}
                 
 		//Recebe a soma de cada escravo
-		for (ThreadAC w : meninxs) {
-			subVetor[i] = w.soma;
+		for (ThreadMestre w : meninxs) {
+			subVetor.add(w.soma);
 			i++;
 		}
 
-                //TODO:
-                //mestre precisa somar esse menino antes de retornar
-		return subVetor;
+		return somarSubVetor(subVetor);
 	}
 
 	//Registra Escravo na listinha do mestre
-	public void incluirFilaEscravos(InterfaceEscravo e, String id)
+        @Override
+	public void incluirFilaEscravos(InterfaceEscravo e)
 			throws RemoteException {
-		listaEscravos.put(id, e);
-		// System.out.println("Slave reporting for duty!");
+		listaEscravos.put(idEscravo, e);
+                idEscravo++;
 	}
 
 	//Remove escravo da listinha do mestre
         @Override
-	public void removerFilaEscravos(String id) throws RemoteException {
-		listaEscravos.remove(listaEscravos.get(id));
+	public void removerFilaEscravos(InterfaceEscravo e) throws RemoteException {
+		listaEscravos.remove(e.getId());
+	}
+        
+        @Override
+	public void removerFilaEscravos(int id) throws RemoteException {
+		listaEscravos.remove(id);
+	}
+        
+	private byte somarSubVetor(List<Byte> vetor) {
+		byte sum = 0;
+
+		for(Byte number : vetor)
+			sum = (byte) (sum ^ number); 
+		
+		return sum;
 	}
 
 	public static void main(String[] args) {
-		String host = (args.length < 1) ? "" : args[0];
+		String host = (args.length < 1) ? "localhost" : args[0];
 
 		if (args.length > 0) {
 			System.setProperty("java.rmi.server.hostname", args[0]);
 		}
 
-		System.out.println("Connection try at host: " + host);
+		System.out.println("Tentando se conectar ao host: " + host);
 
 		try {
 			ImplementacaoMestre obj = new ImplementacaoMestre();
@@ -130,46 +145,39 @@ public class ImplementacaoMestre implements InterfaceMestre {
 			InterfaceMestre ref = (InterfaceMestre) UnicastRemoteObject
 					.exportObject(obj, 2001);
 
-			/* Comentado para executar remoto. */
-			// MestreService ref = (MestreService)
-			// UnicastRemoteObject.exportObject(obj, 0);
+			// Comentado para executar remoto
+//			ImplementacaoMestre ref = (ImplementacaoMestre) UnicastRemoteObject.exportObject(obj, 0);
 
 			Registry registry = LocateRegistry.getRegistry(host);
 			registry.rebind("ReferenciaMestre", ref);
 			obj.attachShutDownHook();
-			// System.out.println("Master reporting!");
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-    @Override
-    public void incluirFilaEscravos(InterfaceEscravo escravo) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 	//Thread Mestre
-	public class ThreadAC extends Thread {
+	public class ThreadMestre extends Thread {
 
-		public final InterfaceEscravo escravo;
-		public byte soma;
-		public byte[] subvetor;
+            public final InterfaceEscravo escravo;
+            public byte soma;
+            List<Byte> subvetor = new ArrayList<>();
 
-		public ThreadAC (InterfaceEscravo escravo, byte[] subvetor) {
-			this.escravo = escravo;
-			this.subvetor = subvetor;
-		}
+            public ThreadMestre (InterfaceEscravo escravo, List<Byte> subvetor) {
+                    this.escravo = escravo;
+                    this.subvetor = subvetor;
+            }
 
-		/* Executa quando a thread e iniciada. */
-		@Override
-		public void run() {
+            /* Executa quando a thread e iniciada. */
+            @Override
+            public void run() {
 
-			try {
-				soma = escravo.somar(subvetor);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
+                try {
+                    soma = escravo.somar(subvetor);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+                    }
+            }
 	}
 }
