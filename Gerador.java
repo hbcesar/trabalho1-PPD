@@ -4,10 +4,12 @@ import java.util.Random;
 
 public class Gerador {
 	public List<Byte> gerarVetor(){
+		
 		Random gerador = new Random();
 		int tamanho_vetor;
-		
-		tamanho_vetor = 500;//gerador.nextInt() + 100;
+
+		//gerador.nextInt() + 100;
+		tamanho_vetor = 10000000;
                
 		List<Byte> vetor = new ArrayList<>();
 		

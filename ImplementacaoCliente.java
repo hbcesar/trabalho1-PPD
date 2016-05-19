@@ -16,9 +16,10 @@ public class ImplementacaoCliente {
 
 	public static void main(String[] args) {
 		//nome que sera associado ao mestre
-		String host = (args.length < 1) ? null : args[0];
+		String nome = "localhost";
 
 		Gerador g = new Gerador();
+		
 		List<Byte> vetorInicial = new ArrayList<>();
         vetorInicial = g.gerarVetor();
 
@@ -27,15 +28,24 @@ public class ImplementacaoCliente {
 
 		try {
 			//faz registro do mestre com o nome dado
-			Registry registry = LocateRegistry.getRegistry(host);
+			Registry registry = LocateRegistry.getRegistry(nome);
                         
 			//objeto remoto que o qual executara os metodos			
 			final InterfaceMestre stub = (InterfaceMestre)registry.lookup("ReferenciaMestre");
 
+			//inicio do tempo de execucao do mestre
+			long tempoInicial = System.nanoTime();
+			
 			//CLiente passa para o mestre o vetor de bytes
 			byte resultado = stub.somar(vetorInicial);
+
+			long tempoFinal = System.nanoTime();
+
+			double tempoExecucao = (tempoFinal - tempoInicial)/Math.pow(10,9);
+
 			System.out.println("Resultado: "+resultado);			
 			System.out.println("Resultado estatico: "+(resultado_estatico));
+			System.out.println("Tempo de execucao: "+tempoExecucao+" s");
 
 		} catch (Exception e) {
 			System.err.println("Erro encontrado (cliente): " + e.toString());

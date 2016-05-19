@@ -10,7 +10,7 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 	public int id;
 
 	@Override
-        public int getId() throws RemoteException {
+    public int getId() throws RemoteException {
 		return id;
 	}
 
@@ -19,8 +19,8 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 		this.id = id;
 	}
 
-	/* Metodo que ordena o pedaco do vetor do cliente recebido pelo escravo. */
-        @Override
+	//Metodo que ordena o pedaco do vetor do cliente recebido pelo escravo
+    @Override
 	public Byte somar(List<Byte> vetor) throws RemoteException {
 		byte sum = 0;
 
@@ -50,29 +50,23 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 		String host = (args.length < 1) ? null : args[1];
 
 		InterfaceMestre mestre;
-
+		
 		if (args.length > 0) {
 			System.setProperty("java.rmi.server.hostname", args[0]);
 		}
 
 		try {
-                    /* Procura Mestre no Registry. */
-                    Registry registry = LocateRegistry.getRegistry(host);
-                    mestre = (InterfaceMestre) registry.lookup("ReferenciaMestre");
+                //Procura Mestre no Registry
+                Registry registry = LocateRegistry.getRegistry(host);
+                mestre = (InterfaceMestre) registry.lookup("ReferenciaMestre");
 
-                    ImplementacaoEscravo escravo = new ImplementacaoEscravo();
-                    
+                ImplementacaoEscravo escravo = new ImplementacaoEscravo();
 
-                    //http://www.javapractices.com/topic/TopicAction.do?Id=56
-//                    escravo.setId(UUID.randomUUID().toString());
+                InterfaceEscravo stub = (InterfaceEscravo) UnicastRemoteObject.exportObject(escravo, 0);
 
-                    InterfaceEscravo stub = (InterfaceEscravo) UnicastRemoteObject.exportObject(escravo, 0);
-
-                    //EscravoService stub = (EscravoService) UnicastRemoteObject.exportObject(escravo, 0);
-
-                    //De acordo com especificação, escravo deve se registrar no menino mestre
-                    mestre.incluirFilaEscravos(stub);
-                    escravo.attachShutDownHook(mestre);
+                //De acordo com especificação, escravo deve se registrar no menino mestre
+                mestre.incluirFilaEscravos(stub);
+                escravo.attachShutDownHook(mestre);
 
 		} catch (RemoteException | NotBoundException e) {
 			e.printStackTrace();

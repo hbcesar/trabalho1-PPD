@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.Map;
 
 public class ImplementacaoMestre implements InterfaceMestre {
-        //Lista de escravos guardada pelo mestre
+    //Lista de escravos guardada pelo mestre
 	private Map<Integer, InterfaceEscravo> listaEscravos = new HashMap<>();
         
-        //Lista de threads (de escravos executando)s
+    //Lista de threads (de escravos executando)s
 	private List<Thread> threads = new ArrayList<>();
         
-        //Lista de "sub-somas" dos escravos
-        private List<Byte> subVetor = new ArrayList<>();
+    //Lista de "sub-somas" dos escravos
+    private List<Byte> subVetor = new ArrayList<>();
         
-        private int idEscravo = 0;
+    private int idEscravo = 0;
 
 	// Captura o CTRL+C
 	//http://stackoverflow.com/questions/1611931/catching-ctrlc-in-java
@@ -32,7 +32,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
 						.entrySet()) {
 					listaEscravos.remove(escravo);
 				}
-				System.out.println("Mestre Caiu :(");
+				System.out.println(" Mestre Caiu! :(");
 			}
 		});
 	}
@@ -69,7 +69,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
 			//Cria copia do vetor com tamanho desejado
 			//http://www.tutorialspoint.com/java/util/arrays_copyofrange_short.htm
 			List<Byte> subVetor = new ArrayList<>(); 
-                        subVetor = new ArrayList<Byte>(vetor.subList(inicio, fim));
+            subVetor = new ArrayList<Byte>(vetor.subList(inicio, fim));
 			range += tamVetorEscravos;
 			
 			inicio = fim;
@@ -95,19 +95,23 @@ public class ImplementacaoMestre implements InterfaceMestre {
                 
 		//Recebe a soma de cada escravo
 		for (ThreadMestre w : meninxs) {
-			subVetor.add(w.soma);
+			resultados.add(w.soma);
 			i++;
 		}
 
-		return somarSubVetor(subVetor);
+		return somarSubVetor(resultados);
 	}
 
 	//Registra Escravo na listinha do mestre
         @Override
-	public void incluirFilaEscravos(InterfaceEscravo e)
+	public int incluirFilaEscravos(InterfaceEscravo e)
 			throws RemoteException {
 		listaEscravos.put(idEscravo, e);
                 idEscravo++;
+		
+		System.out.println("Escravo "+idEscravo+ " adicionado.");
+	
+		return idEscravo;	
 	}
 
 	//Remove escravo da listinha do mestre
@@ -119,12 +123,14 @@ public class ImplementacaoMestre implements InterfaceMestre {
         @Override
 	public void removerFilaEscravos(int id) throws RemoteException {
 		listaEscravos.remove(id);
+				
+		System.out.println("Escravo "+idEscravo+ " removido.");
 	}
         
 	private byte somarSubVetor(List<Byte> vetor) {
 		byte sum = 0;
 
-		for(Byte number : vetor)
+		for(byte number : vetor)
 			sum = (byte) (sum ^ number); 
 		
 		return sum;
