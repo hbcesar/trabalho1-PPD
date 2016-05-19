@@ -38,14 +38,14 @@ public class ImplementacaoMestre implements InterfaceMestre {
 	}
 
 
-	//Metodo usado pelo cliente para fazer a soma
+	//Metodo usado pelo mestre para fazer a soma
 	@Override
 	public byte somar(List<Byte> vetor) throws RemoteException {
 		int i = 0;
 		List<Byte> resultados = new ArrayList<>();
 		int tamVetor = vetor.size();
-		int tamVetorEscravos = tamVetor / this.threads.size();
-		int resto = 0;
+		int tamVetorEscravos = tamVetor / listaEscravos.size();
+		int resto = tamVetor % listaEscravos.size();
 		int range = 0;
 		int inicio = 0;
 		int fim = tamVetorEscravos;
@@ -54,13 +54,13 @@ public class ImplementacaoMestre implements InterfaceMestre {
 		List<ThreadMestre> meninxs = new ArrayList<>();
 		
 		//Define o tamanho do subvetor que será enviado a cada escravo
-		if(tamVetorEscravos * listaEscravos.size() != tamVetor){
-			resto = tamVetor % tamVetorEscravos;
-		}
+		//if(tamVetorEscravos * listaEscravos.size() != tamVetor){
+		//	resto = tamVetor % tamVetorEscravos;
+		//}
 		
                 //http://stackoverflow.com/questions/46898/how-to-efficiently-iterate-over-each-entry-in-a-map
 		for(Map.Entry<Integer, InterfaceEscravo> e: listaEscravos.entrySet()){
-			//se a divisao de vetores nao for exata, vai atribuindo +1 campo do vetor a cada menino escravo
+			//se a divisao de vetores nao for exata, vai atribuindo +1 campo do vetor a cada escravo
 			if(resto > 0){
                             fim++;
                             resto--;
@@ -69,10 +69,10 @@ public class ImplementacaoMestre implements InterfaceMestre {
 			//Cria copia do vetor com tamanho desejado
 			//http://www.tutorialspoint.com/java/util/arrays_copyofrange_short.htm
 			List<Byte> subVetor = new ArrayList<>(); 
-                        subVetor = vetor.subList(inicio, fim);
+                        subVetor = new ArrayList<Byte>(vetor.subList(inicio, fim));
 			range += tamVetorEscravos;
 			
-			inicio = ++fim;
+			inicio = fim;
 			fim += tamVetorEscravos;
 			
                         //Cria as threads para executar os meninos escravos
@@ -137,13 +137,12 @@ public class ImplementacaoMestre implements InterfaceMestre {
 			System.setProperty("java.rmi.server.hostname", args[0]);
 		}
 
-		System.out.println("Tentando se conectar ao host: " + host);
+		System.out.println("Conectando-se ao host... " + host);
 
 		try {
 			ImplementacaoMestre obj = new ImplementacaoMestre();
 
-			InterfaceMestre ref = (InterfaceMestre) UnicastRemoteObject
-					.exportObject(obj, 2001);
+			InterfaceMestre ref = (InterfaceMestre) UnicastRemoteObject.exportObject(obj, 2001);
 
 			// Comentado para executar remoto
 //			ImplementacaoMestre ref = (ImplementacaoMestre) UnicastRemoteObject.exportObject(obj, 0);

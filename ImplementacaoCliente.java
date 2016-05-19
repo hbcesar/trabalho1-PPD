@@ -4,28 +4,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImplementacaoCliente {	 
+	
+	public static Byte somar(List<Byte> vetor) {
+		byte sum = 0;
+
+		for(Byte number : vetor)
+			sum = (byte) (sum ^ number); 
+		
+		return sum;
+	}
+
 	public static void main(String[] args) {
 		//nome que sera associado ao mestre
-		String nome = "localhost";
+		String host = (args.length < 1) ? null : args[0];
 
 		Gerador g = new Gerador();
 		List<Byte> vetorInicial = new ArrayList<>();
-                vetorInicial = g.gerarVetor();
+        vetorInicial = g.gerarVetor();
+
+		byte resultado_estatico = somar(vetorInicial);
+		
 
 		try {
 			//faz registro do mestre com o nome dado
-			Registry registry = LocateRegistry.getRegistry(nome);
+			Registry registry = LocateRegistry.getRegistry(host);
                         
 			//objeto remoto que o qual executara os metodos			
-			final InterfaceMestre stub = (InterfaceMestre)registry.lookup(ImplementacaoMestre.class.getSimpleName());
+			final InterfaceMestre stub = (InterfaceMestre)registry.lookup("ReferenciaMestre");
 
 			//CLiente passa para o mestre o vetor de bytes
 			byte resultado = stub.somar(vetorInicial);
-
-			//System.out.println("response: " + Arrays.toString(vetor));	
+			System.out.println("Resultado: "+resultado);			
+			System.out.println("Resultado estatico: "+(resultado_estatico));
 
 		} catch (Exception e) {
 			System.err.println("Erro encontrado (cliente): " + e.toString());
+			e.printStackTrace();
 		}
 	}
 }

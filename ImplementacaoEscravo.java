@@ -31,7 +31,7 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 	}
 
 	// Desregistra o escravo da lista do Mestre em caso termino.
-	public void attachShutDownHook(final ImplementacaoMestre mestre) {
+	public void attachShutDownHook(final InterfaceMestre mestre) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
@@ -49,7 +49,7 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 
 		String host = (args.length < 1) ? null : args[1];
 
-		ImplementacaoMestre mestre;
+		InterfaceMestre mestre;
 
 		if (args.length > 0) {
 			System.setProperty("java.rmi.server.hostname", args[0]);
@@ -58,16 +58,15 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 		try {
                     /* Procura Mestre no Registry. */
                     Registry registry = LocateRegistry.getRegistry(host);
-                    mestre = (ImplementacaoMestre) registry.lookup("ReferenciaMestre");
+                    mestre = (InterfaceMestre) registry.lookup("ReferenciaMestre");
 
                     ImplementacaoEscravo escravo = new ImplementacaoEscravo();
-                    
                     
 
                     //http://www.javapractices.com/topic/TopicAction.do?Id=56
 //                    escravo.setId(UUID.randomUUID().toString());
 
-                    ImplementacaoEscravo stub = (ImplementacaoEscravo) UnicastRemoteObject.exportObject(escravo, 2001);
+                    InterfaceEscravo stub = (InterfaceEscravo) UnicastRemoteObject.exportObject(escravo, 0);
 
                     //EscravoService stub = (EscravoService) UnicastRemoteObject.exportObject(escravo, 0);
 
