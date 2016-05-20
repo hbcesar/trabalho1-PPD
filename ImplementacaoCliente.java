@@ -16,36 +16,44 @@ public class ImplementacaoCliente {
 
 	public static void main(String[] args) {
 		//nome que sera associado ao mestre
-		String nome = "localhost";
+		String host = (args.length < 1) ? null : args[1];
 
 		Gerador g = new Gerador();
 		
 		List<Byte> vetorInicial = new ArrayList<>();
         vetorInicial = g.gerarVetor();
 
-		byte resultado_estatico = somar(vetorInicial);
-		
-
 		try {
 			//faz registro do mestre com o nome dado
-			Registry registry = LocateRegistry.getRegistry(nome);
+			Registry registry = LocateRegistry.getRegistry(host);
                         
 			//objeto remoto que o qual executara os metodos			
 			final InterfaceMestre stub = (InterfaceMestre)registry.lookup("ReferenciaMestre");
 
-			//inicio do tempo de execucao do mestre
-			long tempoInicial = System.nanoTime();
+
+			System.out.println("Tamanho do Vetor;Tempo de Execução Estático;Tempo de Execução Distribuido");			
+			for(int i=500; i<5000; i += 500){
+				//Executa Calculo Serial Não paralelizado e calcula o tempo gasto
+				long tempoInicialEstatico = System.nanoTime();
+				byte resultado_estatico = somar(vetorInicial);
+				long tempoFinalEstatico = System.nanoTime();
+
+
+				//inicio do tempo de execucao do mestre
+				long tempoInicial = System.nanoTime();
+				//CLiente passa para o mestre o vetor de bytes
+				byte resultado = stub.somar(vetorInicial);
+				//fim do tempo de execucao do mestre
+				long tempoFinal = System.nanoTime();
+
+
+				double tempoExecucaoEstatico = (tempoFinalEstatico - tempoInicialEstatico)/Math.pow(10,9);
+				double tempoExecucao = (tempoFinal - tempoInicial)/Math.pow(10,9);
+
+				System.out.println(vetorInicial.size() + ";" + tempoExecucaoEstatico + ";" + tempoExecucao);
+			}
 			
-			//CLiente passa para o mestre o vetor de bytes
-			byte resultado = stub.somar(vetorInicial);
-
-			long tempoFinal = System.nanoTime();
-
-			double tempoExecucao = (tempoFinal - tempoInicial)/Math.pow(10,9);
-
-			System.out.println("Resultado: "+resultado);			
-			System.out.println("Resultado estatico: "+(resultado_estatico));
-			System.out.println("Tempo de execucao: "+tempoExecucao+" s");
+			
 
 		} catch (Exception e) {
 			System.err.println("Erro encontrado (cliente): " + e.toString());

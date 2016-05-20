@@ -18,7 +18,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
     //Lista de "sub-somas" dos escravos
     private List<Byte> subVetor = new ArrayList<>();
         
-    private int idEscravo = 0;
+    private int idEscravo = 1;
 
 	// Captura o CTRL+C
 	//http://stackoverflow.com/questions/1611931/catching-ctrlc-in-java
@@ -107,9 +107,10 @@ public class ImplementacaoMestre implements InterfaceMestre {
 	public int incluirFilaEscravos(InterfaceEscravo e)
 			throws RemoteException {
 		listaEscravos.put(idEscravo, e);
+		e.setId(idEscravo);
                 idEscravo++;
 		
-		System.out.println("Escravo "+idEscravo+ " adicionado.");
+		System.out.println("Escravo "+e.getId()+ " adicionado.");
 	
 		return idEscravo;	
 	}
@@ -124,7 +125,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
 	public void removerFilaEscravos(int id) throws RemoteException {
 		listaEscravos.remove(id);
 				
-		System.out.println("Escravo "+idEscravo+ " removido.");
+		System.out.println("Escravo "+id+ " removido.");
 	}
         
 	private byte somarSubVetor(List<Byte> vetor) {
