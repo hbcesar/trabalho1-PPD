@@ -16,12 +16,27 @@ public class ImplementacaoCliente {
 
 	public static void main(String[] args) {
 		//nome que sera associado ao mestre
-		String host = (args.length < 1) ? null : args[1];
+		String host = (args.length < 1) ? null : args[0];
 
 		Gerador g = new Gerador();
 		
 		List<Byte> vetorInicial = new ArrayList<>();
-        vetorInicial = g.gerarVetor();
+
+
+		//variaveis que armazenam informacoes para comparação
+		long tempoInicialEstatico = 0;
+		byte resultado_estatico = 0;
+		long tempoFinalEstatico = 0;
+		//inicio do tempo de execucao do mestre
+		long tempoInicial = 0;
+		//CLiente passa para o mestre o vetor de bytes
+		byte resultado = 0;
+		//fim do tempo de execucao do mestre
+		long tempoFinal = 0;
+
+		double tempoExecucaoEstatico = 0;
+				double tempoExecucao = 0;
+       
 
 		try {
 			//faz registro do mestre com o nome dado
@@ -32,23 +47,25 @@ public class ImplementacaoCliente {
 
 
 			System.out.println("Tamanho do Vetor;Tempo de Execução Estático;Tempo de Execução Distribuido");			
-			for(int i=500; i<5000; i += 500){
+			for(int i=500; i<=1000000; i += 500){
+				 vetorInicial = g.gerarVetor(i);
+
 				//Executa Calculo Serial Não paralelizado e calcula o tempo gasto
-				long tempoInicialEstatico = System.nanoTime();
-				byte resultado_estatico = somar(vetorInicial);
-				long tempoFinalEstatico = System.nanoTime();
+				tempoInicialEstatico = System.nanoTime();
+				resultado_estatico = somar(vetorInicial);
+				tempoFinalEstatico = System.nanoTime();
 
 
 				//inicio do tempo de execucao do mestre
-				long tempoInicial = System.nanoTime();
+				tempoInicial = System.nanoTime();
 				//CLiente passa para o mestre o vetor de bytes
-				byte resultado = stub.somar(vetorInicial);
+				resultado = stub.somar(vetorInicial);
 				//fim do tempo de execucao do mestre
-				long tempoFinal = System.nanoTime();
+				tempoFinal = System.nanoTime();
 
 
-				double tempoExecucaoEstatico = (tempoFinalEstatico - tempoInicialEstatico)/Math.pow(10,9);
-				double tempoExecucao = (tempoFinal - tempoInicial)/Math.pow(10,9);
+				tempoExecucaoEstatico = (tempoFinalEstatico - tempoInicialEstatico);
+				tempoExecucao = (tempoFinal - tempoInicial);
 
 				System.out.println(vetorInicial.size() + ";" + tempoExecucaoEstatico + ";" + tempoExecucao);
 			}
