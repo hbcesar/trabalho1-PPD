@@ -1,3 +1,4 @@
+
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -7,69 +8,82 @@ import java.util.List;
 
 public class ImplementacaoEscravo implements InterfaceEscravo {
 
-	public int id;
+    private int id;
 
-	@Override
-    public int getId() throws RemoteException {
-		return id;
-	}
-
-        @Override
-	public void setId(int id) throws RemoteException {
-		this.id = id;
-	}
-
-	//Metodo que ordena o pedaco do vetor do cliente recebido pelo escravo
     @Override
-	public Byte somar(List<Byte> vetor) throws RemoteException {
-		byte sum = 0;
+    public int getId() throws RemoteException {
+        return id;
+    }
 
-		for(Byte number : vetor)
-			sum = (byte) (sum ^ number); 
-		
-		return sum;
-	}
+    @Override
+    public void setId(int id) throws RemoteException {
+        this.id = id;
+    }
 
-	// Desregistra o escravo da lista do Mestre em caso termino.
-	public void attachShutDownHook(final InterfaceMestre mestre) {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				try {
-					mestre.removerFilaEscravos(id);
-					// System.out.println("Slave free!");
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    //Metodo que ordena o pedaco do vetor do cliente recebido pelo escravo
+    @Override
+    public Byte somar(List<Byte> vetor) throws RemoteException {
+        byte sum = 0;
 
-	public static void main(String[] args) {
+        for (Byte number : vetor) {
+            sum = (byte) (sum ^ number);
+        }
 
-		String host = (args.length < 1) ? null : args[1];
+        return sum;
+    }
 
-		InterfaceMestre mestre;
-		
-		if (args.length > 0) {
-			System.setProperty("java.rmi.server.hostname", args[0]);
-		}
+    // Desregistra o escravo da lista do Mestre em caso termino.
+    public void attachShutDownHook(final InterfaceMestre mestre) {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try {
+                    mestre.removerFilaEscravos(id);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
-		try {
-                //Procura Mestre no Registry
-                Registry registry = LocateRegistry.getRegistry(host);
-                mestre = (InterfaceMestre) registry.lookup("ReferenciaMestre");
+    public static void main(String[] args) {
+        /*
+            Cria instância da interface do mestre,
+            essa operação é necessária para que o escravo consiga se
+            registrar na fila gerenciada pelo mestre.
+         */
+        InterfaceMestre mestre;
 
-                ImplementacaoEscravo escravo = new ImplementacaoEscravo();
+        //Para execução distribuida: java ImplementacaoEscravo IPESCRAVO IPMESTRE
+        //Aqui o escravo recebe sua propria referencia
+        String host = null;
+        if (args.length > 1) {
+            host = args[1];
+        }
 
-                InterfaceEscravo stub = (InterfaceEscravo) UnicastRemoteObject.exportObject(escravo, 0);
+        //Escravo recebe referencia para o mestre
+        if (args.length > 0) {
+            System.setProperty("java.rmi.server.hostname", args[0]);
+        }
 
-                //De acordo com especificação, escravo deve se registrar no menino mestre
-                mestre.incluirFilaEscravos(stub);
-                escravo.attachShutDownHook(mestre);
+        try {
+            //Procura Mestre no Registry
+            Registry registry = LocateRegistry.getRegistry(host);
+            mestre = (InterfaceMestre) registry.lookup("ReferenciaMestre");
 
-		} catch (RemoteException | NotBoundException e) {
-			e.printStackTrace();
-		}
-	}
+            ImplementacaoEscravo escravo = new ImplementacaoEscravo();
+
+            //cria stub do escravo
+            InterfaceEscravo stub = (InterfaceEscravo) UnicastRemoteObject.exportObject(escravo, 0);
+
+            //De acordo com especificação, escravo deve se registrar no menino mestre
+            mestre.incluirFilaEscravos(stub);
+            
+            //"Attach" o metodo que executa operacoes necessarias caso o escravo finalize
+            escravo.attachShutDownHook(mestre);
+
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+        }
+    }
 }
