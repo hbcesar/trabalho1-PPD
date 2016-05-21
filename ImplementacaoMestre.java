@@ -52,7 +52,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
         int fim = tamVetorEscravos;
 
         //Lista com objetos que gerenciam as threads de cada escravo, usada para obter os valores das somas dos vetores parciais
-        List<ThreadMestre> meninxs = new ArrayList<>();
+        List<ThreadMestreEscravo> meninxs = new ArrayList<>();
 
         //Define o tamanho do subvetor que será enviado a cada escravo
         //http://stackoverflow.com/questions/46898/how-to-efficiently-iterate-over-each-entry-in-a-map
@@ -64,7 +64,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
             }
 
             //Cria copia do vetor com tamanho desejado
-            //http://www.tutorialspoint.com/java/util/arrays_copyofrange_short.htm
+            https://docs.oracle.com/javase/7/docs/api/java/util/ArrayList.html#subList(int,%20int)
             List<Byte> subVetor = new ArrayList<>();
             subVetor = new ArrayList<Byte>(vetor.subList(inicio, fim));
             range += tamVetorEscravos;
@@ -73,7 +73,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
             fim += tamVetorEscravos;
 
             //Cria as threads para executar os meninos escravos
-            ThreadMestre exec = new ThreadMestre(e.getValue(), subVetor);
+            ThreadMestreEscravo exec = new ThreadMestreEscravo(e.getValue(), subVetor);
             meninxs.add(exec);
             Thread t = new Thread(exec);
             threads.add(t);
@@ -91,7 +91,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
         }
 
         //Recebe a soma de cada escravo
-        for (ThreadMestre w : meninxs) {
+        for (ThreadMestreEscravo w : meninxs) {
             resultados.add(w.soma);
             i++;
         }
@@ -101,15 +101,13 @@ public class ImplementacaoMestre implements InterfaceMestre {
 
     //Registra Escravo na listinha do mestre
     @Override
-    public int incluirFilaEscravos(InterfaceEscravo e)
+    public void incluirFilaEscravos(InterfaceEscravo e)
             throws RemoteException {
         listaEscravos.put(idEscravo, e);
         e.setId(idEscravo);
         idEscravo++;
 
         System.out.println("Escravo " + e.getId() + " adicionado.");
-
-        return idEscravo;
     }
 
     //Remove escravo da listinha do mestre

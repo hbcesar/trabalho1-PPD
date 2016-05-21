@@ -45,6 +45,8 @@ public class ImplementacaoCliente {
         long tempoInicial = 0;
         long tempoFinal = 0;
         byte resultado = 0;
+        
+        
 
         //Calcula o tempo de execucao para ambos os casos
         double tempoExecucaoEstatico = 0;

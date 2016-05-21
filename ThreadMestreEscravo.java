@@ -1,9 +1,8 @@
-
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ThreadMestre extends Thread {
+public class ThreadMestreEscravo extends Thread {
 
     //Referencia para escravo que receberá o trabalho sujo a ser feito
     //(tá final prq o NetBeans falou que isso era bacana)
@@ -16,12 +15,12 @@ public class ThreadMestre extends Thread {
     List<Byte> subvetor = new ArrayList<>();
 
     //Construtor da classe
-    public ThreadMestre(InterfaceEscravo escravo, List<Byte> subvetor) {
+    public ThreadMestreEscravo(InterfaceEscravo escravo, List<Byte> subvetor) {
         this.escravo = escravo;
         this.subvetor = subvetor;
     }
 
-    //Quando a thread é iniciada, pega o vetorzinho e manda pro escravinho
+    //Quando a thread é iniciada, pega o vetorzinho e manda pro escravo
     @Override
     public void run() {
 

@@ -1,4 +1,0 @@
-rmiregistry &
-java -Djava.rmi.server.hostname="MEUIP" IImplementacaoMestre
-java ImplementacaoEscravo IPESCRAVO IPMESTRE &
-java ImplementacaoCliente IPMESTRE
