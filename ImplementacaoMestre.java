@@ -64,7 +64,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
             }
 
             //Cria copia do vetor com tamanho desejado
-            https://docs.oracle.com/javase/7/docs/api/java/util/ArrayList.html#subList(int,%20int)
+            //https://docs.oracle.com/javase/7/docs/api/java/util/ArrayList.html#subList(int,%20int)
             List<Byte> subVetor = new ArrayList<>();
             subVetor = new ArrayList<Byte>(vetor.subList(inicio, fim));
             range += tamVetorEscravos;
@@ -137,7 +137,7 @@ public class ImplementacaoMestre implements InterfaceMestre {
         //recebe nome que foi associado ao mestre (para buscar no Registry)
         String host = "localhost";
 
-        if (args.length >= 1) {
+        if (args.length > 0) {
             host = args[0];
         }
 
@@ -151,10 +151,10 @@ public class ImplementacaoMestre implements InterfaceMestre {
         try {
             //Referencia para o mestre (pra fazer o bind)
             ImplementacaoMestre mestre = new ImplementacaoMestre();
-            InterfaceMestre refMestre = (InterfaceMestre) UnicastRemoteObject.exportObject(mestre, 2001);
+            InterfaceMestre refMestre = (InterfaceMestre) UnicastRemoteObject.exportObject(mestre, 0);
 
             //Pega referencia ao mestre no registro de nomes, e faz o bind (no middleware)
-            Registry registry = LocateRegistry.getRegistry(host);
+            Registry registry = LocateRegistry.getRegistry();
             registry.rebind("ReferenciaMestre", refMestre);
 
             //"Attach" acao para caso o mestre caia

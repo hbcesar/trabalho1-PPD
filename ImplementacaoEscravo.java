@@ -57,20 +57,20 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
         //Para execução distribuida: java ImplementacaoEscravo IPESCRAVO IPMESTRE
         //Aqui o escravo recebe sua propria referencia
         String host = null;
-        if (args.length > 1) {
-            host = args[1];
+        if (args.length > 0) {
+            host = args[0];
         }
 
         //Escravo recebe referencia para o mestre
-        if (args.length > 0) {
-            System.setProperty("java.rmi.server.hostname", args[0]);
-        }
+        //if (args.length > 0) {
+        //System.setProperty("java.rmi.server.hostname", args[0]);
+        //}
 
         try {
             //Procura Mestre no Registry
+            System.out.println(host);
             Registry registry = LocateRegistry.getRegistry(host);
             mestre = (InterfaceMestre) registry.lookup("ReferenciaMestre");
-
             ImplementacaoEscravo escravo = new ImplementacaoEscravo();
 
             //cria stub do escravo
@@ -78,7 +78,7 @@ public class ImplementacaoEscravo implements InterfaceEscravo {
 
             //De acordo com especificação, escravo deve se registrar no menino mestre
             mestre.incluirFilaEscravos(stub);
-            
+
             //"Attach" o metodo que executa operacoes necessarias caso o escravo finalize
             escravo.attachShutDownHook(mestre);
 

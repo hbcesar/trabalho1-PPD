@@ -21,7 +21,7 @@ public class ImplementacaoCliente {
 
         //recebe nome que foi associado ao mestre (para buscar no Registry)
         String host = null;
-        if (args.length > 1) {
+        if (args.length > 0) {
             host = args[0];
         }
 
@@ -45,8 +45,8 @@ public class ImplementacaoCliente {
         long tempoInicial = 0;
         long tempoFinal = 0;
         byte resultado = 0;
-        
-        
+
+
 
         //Calcula o tempo de execucao para ambos os casos
         double tempoExecucaoEstatico = 0;
@@ -56,20 +56,20 @@ public class ImplementacaoCliente {
             //faz registro do mestre com o nome dado
             Registry registry = LocateRegistry.getRegistry(host);
 
-            //objeto remoto que o qual executara os metodos			
+            //objeto remoto que o qual executara os metodos
             final InterfaceMestre stub = (InterfaceMestre) registry.lookup("ReferenciaMestre");
 
             //Imprime o header do CSV
             System.out.println("Tamanho do Vetor;Tempo de Execução Estático;Tempo de Execução Distribuido");
 
             //testa vetores (tamanho de 500 até 10ˆ6 com intervalos de 500)
-            for (int i = 500; i <= 1000000; i += 500) {
+            for (int i = 500; i <= 100000; i += 500) {
                 vetorInicial = g.gerarVetor(i);
 
                 //Executa Calculo Serial Não paralelizado
-                tempoInicialEstatico = System.nanoTime();
-                resultado_estatico = somar(vetorInicial);
-                tempoFinalEstatico = System.nanoTime();
+//                tempoInicialEstatico = System.nanoTime();
+//                resultado_estatico = somar(vetorInicial);
+//                tempoFinalEstatico = System.nanoTime();
 
                 //Executa calculo Paralelo
                 tempoInicial = System.nanoTime();
@@ -77,7 +77,7 @@ public class ImplementacaoCliente {
                 tempoFinal = System.nanoTime();
 
                 //Calcula tempo gasto em ambos os casos
-                tempoExecucaoEstatico = (tempoFinalEstatico - tempoInicialEstatico);
+                tempoExecucaoEstatico = 0; //(tempoFinalEstatico - tempoInicialEstatico);
                 tempoExecucao = (tempoFinal - tempoInicial);
 
                 System.out.println(vetorInicial.size() + ";" + tempoExecucaoEstatico + ";" + tempoExecucao);
